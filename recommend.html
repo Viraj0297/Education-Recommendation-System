@@ -1,0 +1,323 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <!-- Existing head content remains unchanged -->
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Studies Recommendation</title>
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
+    <style>
+        /* Existing styles remain unchanged */
+        body {
+            background-color: #f8f9fa;
+            font-family: 'Arial', sans-serif;
+        }
+
+        .mynav {
+            background-color: #343a40;
+            color: white;
+            padding: 15px 10px;
+            text-align: center;
+            border-radius: 10px;
+            margin-bottom: 30px;
+        }
+
+        .container {
+            margin-top: 30px;
+            border-radius: 15px;
+            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+            padding: 40px;
+            background-color: #fff;
+        }
+
+        h2 {
+            margin-bottom: 20px;
+        }
+
+        .form-group label {
+            font-weight: bold;
+            margin-bottom: 10px;
+        }
+
+        .form-group label .required {
+            color: red;
+            margin-left: 5px;
+        }
+
+        input[type="number"] {
+            transition: border-color 0.3s;
+        }
+
+        input[type="number"]:focus {
+            border-color: #007bff;
+            box-shadow: 0 0 5px rgba(0, 123, 255, 0.5);
+        }
+
+        button {
+            margin-top: 20px;
+        }
+
+        .error {
+            color: red;
+            font-size: 14px;
+            display: none;
+        }
+
+        .alert {
+            display: none;
+        }
+
+        @media (max-width: 768px) {
+            .container {
+                padding: 20px;
+            }
+        }
+    </style>
+    <script>
+        // Function to validate scores and required fields
+        function validateForm() {
+            let isValid = true;
+            const fields = document.querySelectorAll('input[type="number"], select');
+            const errorMessages = document.querySelectorAll('.error');
+
+            // Reset all error messages
+            errorMessages.forEach((msg) => {
+                msg.style.display = 'none';
+                msg.textContent = '';
+            });
+
+            // Validate each input/select field
+            fields.forEach((field) => {
+                const value = field.value.trim();
+                const errorMessage = field.parentElement.querySelector('.error');
+
+                if (field.hasAttribute('required') && value === '') {
+                    errorMessage.textContent = 'Field Required';
+                    errorMessage.style.display = 'block';
+                    isValid = false;
+                } else if (field.type === 'number') {
+                    const numericValue = parseFloat(value);
+                    const min = parseFloat(field.getAttribute('min'));
+                    const max = parseFloat(field.getAttribute('max'));
+
+                    if (value !== '') {
+                        if (isNaN(numericValue)) {
+                            errorMessage.textContent = 'Please enter a valid number';
+                            errorMessage.style.display = 'block';
+                            isValid = false;
+                        } else {
+                            if (field.id === 'weekly_self_study_hours') {
+                                if (numericValue < min || numericValue > max) {
+                                    errorMessage.textContent = 'Please enter a value between 0 to 168';
+                                    errorMessage.style.display = 'block';
+                                    isValid = false;
+                                }
+                            } else if (field.id === 'absence_days') {
+                                if (numericValue < min || numericValue > max) {
+                                    errorMessage.textContent = 'Please enter a valid number between 0 to 235';
+                                    errorMessage.style.display = 'block';
+                                    isValid = false;
+                                }
+                            } else if (numericValue < min || numericValue > max) {
+                                errorMessage.textContent = 'Please enter a valid score between 0 to 100';
+                                errorMessage.style.display = 'block';
+                                isValid = false;
+                            }
+                        }
+                    }
+                }
+            });
+
+            return isValid;
+        }
+
+        // Function to calculate scores
+        function calculateScores() {
+            var mathScore = parseFloat(document.getElementById("math_score").value) || 0;
+            var historyScore = parseFloat(document.getElementById("history_score").value) || 0;
+            var physicsScore = parseFloat(document.getElementById("physics_score").value) || 0;
+            var chemistryScore = parseFloat(document.getElementById("chemistry_score").value) || 0;
+            var biologyScore = parseFloat(document.getElementById("biology_score").value) || 0;
+            var englishScore = parseFloat(document.getElementById("english_score").value) || 0;
+            var geographyScore = parseFloat(document.getElementById("geography_score").value) || 0;
+
+            var totalScore = mathScore + historyScore + physicsScore + chemistryScore + biologyScore + englishScore + geographyScore;
+            var averageScore = totalScore / 7;
+
+            document.getElementById("total_score").value = totalScore.toFixed(2);
+            document.getElementById("average_score").value = averageScore.toFixed(2);
+        }
+    </script>
+</head>
+<body>
+
+    <div class="mynav">
+        <h1>Education Recommendation System</h1>
+    </div>
+
+    <div class="container">
+        <!-- Flash Messages -->
+        {% with messages = get_flashed_messages(with_categories=true) %}
+            {% if messages %}
+                {% for category, message in messages %}
+                    <div class="alert alert-{{ category }} alert-dismissible fade show" role="alert">
+                        {{ message }}
+                        <button type="button" class="close" data-dismiss="alert" aria-label="Close">
+                            <span aria-hidden="true">&times;</span>
+                        </button>
+                    </div>
+                {% endfor %}
+            {% endif %}
+        {% endwith %}
+
+        <h2 class="text-center">Fill in the details to get recommendations</h2>
+        <form method="post" action="/pred" onsubmit="return validateForm()">
+            <!-- Gender and Part-Time Job -->
+            <div class="row">
+                <div class="col-md-6">
+                    <div class="form-group">
+                        <label for="gender">Gender:<span class="required">*</span></label>
+                        <select class="form-control" id="gender" name="gender" required>
+                            <option value="">Select Gender</option>
+                            <option value="male">Male</option>
+                            <option value="female">Female</option>
+                        </select>
+                        <div class="error"></div>
+                    </div>
+                </div>
+                <div class="col-md-6">
+                    <div class="form-group">
+                        <label for="part_time_job">Part-Time Job:<span class="required">*</span></label>
+                        <select class="form-control" id="part_time_job" name="part_time_job" required>
+                            <option value="">Select Option</option>
+                            <option value="true">Yes</option>
+                            <option value="false">No</option>
+                        </select>
+                        <div class="error"></div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Absence Days and Extracurricular Activities -->
+            <div class="row">
+                <div class="col-md-6">
+                    <div class="form-group">
+                        <label for="absence_days">Absence Days:<span class="required">*</span></label>
+                        <input type="number" class="form-control" id="absence_days" name="absence_days" required min="0" max="235">
+                        <div class="error"></div>
+                    </div>
+                </div>
+                <div class="col-md-6">
+                    <div class="form-group">
+                        <label for="extracurricular_activities">Extracurricular Activities:<span class="required">*</span></label>
+                        <select class="form-control" id="extracurricular_activities" name="extracurricular_activities" required>
+                            <option value="">Select Option</option>
+                            <option value="true">Yes</option>
+                            <option value="false">No</option>
+                        </select>
+                        <div class="error"></div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Weekly Self-Study Hours and Math Score -->
+            <div class="row">
+                <div class="col-md-6">
+                    <div class="form-group">
+                        <label for="weekly_self_study_hours">Weekly Self-Study Hours:<span class="required">*</span></label>
+                        <input type="number" class="form-control" id="weekly_self_study_hours" name="weekly_self_study_hours" required min="0" max="168">
+                        <div class="error"></div>
+                    </div>
+                </div>
+                <div class="col-md-6">
+                    <div class="form-group">
+                        <label for="math_score">Math Score:<span class="required">*</span></label>
+                        <input type="number" class="form-control" id="math_score" name="math_score" onchange="calculateScores()" required min="0" max="100">
+                        <div class="error"></div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- History Score and Physics Score -->
+            <div class="row">
+                <div class="col-md-6">
+                    <div class="form-group">
+                        <label for="history_score">History Score:<span class="required">*</span></label>
+                        <input type="number" class="form-control" id="history_score" name="history_score" onchange="calculateScores()" required min="0" max="100">
+                        <div class="error"></div>
+                    </div>
+                </div>
+                <div class="col-md-6">
+                    <div class="form-group">
+                        <label for="physics_score">Physics Score:<span class="required">*</span></label>
+                        <input type="number" class="form-control" id="physics_score" name="physics_score" onchange="calculateScores()" required min="0" max="100">
+                        <div class="error"></div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Chemistry Score and Biology Score -->
+            <div class="row">
+                <div class="col-md-6">
+                    <div class="form-group">
+                        <label for="chemistry_score">Chemistry Score:<span class="required">*</span></label>
+                        <input type="number" class="form-control" id="chemistry_score" name="chemistry_score" onchange="calculateScores()" required min="0" max="100">
+                        <div class="error"></div>
+                    </div>
+                </div>
+                <div class="col-md-6">
+                    <div class="form-group">
+                        <label for="biology_score">Biology Score:<span class="required">*</span></label>
+                        <input type="number" class="form-control" id="biology_score" name="biology_score" onchange="calculateScores()" required min="0" max="100">
+                        <div class="error"></div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- English Score and Geography Score -->
+            <div class="row">
+                <div class="col-md-6">
+                    <div class="form-group">
+                        <label for="english_score">English Score:<span class="required">*</span></label>
+                        <input type="number" class="form-control" id="english_score" name="english_score" onchange="calculateScores()" required min="0" max="100">
+                        <div class="error"></div>
+                    </div>
+                </div>
+                <div class="col-md-6">
+                    <div class="form-group">
+                        <label for="geography_score">Geography Score:<span class="required">*</span></label>
+                        <input type="number" class="form-control" id="geography_score" name="geography_score" onchange="calculateScores()" required min="0" max="100">
+                        <div class="error"></div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Total and Average Scores -->
+            <div class="row">
+                <div class="col-md-6">
+                    <div class="form-group">
+                        <label for="total_score">Total Score:</label>
+                        <input type="number" class="form-control" id="total_score" name="total_score" readonly>
+                        <div class="error"></div>
+                    </div>
+                </div>
+                <div class="col-md-6">
+                    <div class="form-group">
+                        <label for="average_score">Average Score:</label>
+                        <input type="number" step="0.01" class="form-control" id="average_score" name="average_score" readonly>
+                        <div class="error"></div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Submit Button -->
+            <button type="submit" class="btn btn-primary btn-block">Submit</button>
+        </form>
+    </div>
+
+    <!-- Include Bootstrap JS for alert dismissal -->
+    <script src="https://code.jquery.com/jquery-3.5.1.slim.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/popper.js@1.16.1/dist/umd/popper.min.js"></script>
+    <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
+</body>
+</html>

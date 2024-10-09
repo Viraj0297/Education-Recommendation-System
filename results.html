@@ -1,0 +1,57 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Results</title>
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
+    <style>
+        body {
+            background-color: #f8f9fa; /* Light background for contrast */
+            font-family: 'Arial', sans-serif;
+        }
+
+        .header {
+            background-color: #007bff; /* Blue header background */
+            color: white; /* White text color */
+            padding: 20px;
+            text-align: center;
+            border-radius: 10px 10px 0 0; /* Rounded top corners */
+            margin-bottom: 30px; /* Space below header */
+        }
+
+        .recommendation-card {
+            border-radius: 15px;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+            padding: 20px;
+            background-color: #ffffff;
+            margin-bottom: 20px; /* Space between cards */
+        }
+
+        .recommendation-title {
+            font-weight: bold;
+            font-size: 1.2rem; /* Larger font size */
+        }
+
+        .probability {
+            color: #28a745; /* Green color for probability */
+        }
+    </style>
+</head>
+<body>
+    <div class="container mt-5">
+        <div class="header">
+            <h1>Top Recommended Studies</h1>
+            <p>Based on your inputs, here are the best study options for you:</p>
+        </div>
+        <div>
+            {% for recommendation in recommendations %}
+                <div class="recommendation-card">
+                    <p class="recommendation-title">{{ recommendation[0] }}</p>
+                    <p class="probability">Probability: {{ recommendation[1] | round(2) }}%</p>
+                </div>
+            {% endfor %}
+        </div>
+    </div>
+</body>
+</html>
